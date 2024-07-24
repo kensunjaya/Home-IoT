@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "569688138097",
+    "project_id": "home-iot-bc949",
+    "storage_bucket": "home-iot-bc949.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:569688138097:android:7c72cad85e79f2a8a896d0",
+        "android_client_info": {
+          "package_name": "com.kensunjaya.homeiot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuZN4t2ILkaFcTFy-nW0ymqhTnLGUd6Gk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
