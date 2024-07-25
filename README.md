@@ -5,8 +5,9 @@ Home IoT is a mobile application designed for the smart home ecosystem. This app
 ## Getting Started
 
 #### Pre-requisites
-1. <a href="https://docs.flutter.dev/get-started/install">Flutter</a>
+1. <a href="https://docs.flutter.dev/get-started/install">Flutter SDK</a>
 2. Android / iOS emulator or physical device (API level 27+)
+3. Visual Studio Code + Flutter extension
 
 Clone this repository then enter the directory
 ```
@@ -15,19 +16,20 @@ cd Home-IoT
 ```
 
 
-Install all libraries
+Install all required libraries
 ```
 flutter pub get
 ```
 
 
-Power on emulator or connect to a physical device
+Power on emulator or connect to a physical device.
 ```
 flutter devices
 ```
 
 
-Make sure your device is already listed, then execute the follownig command:
+
+Make sure your device is already listed, then execute the following command:
 ```
 flutter run
 ```
