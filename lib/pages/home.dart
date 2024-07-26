@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> fetchDevice() async {
-    userData = await service?.get('users', Auth().currentUser!.email.toString());
+    userData = await service.get('users', Auth().currentUser!.email.toString());
     devices = userData?['lamps'];
     initStatus();
     print(userData);
