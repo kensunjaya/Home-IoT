@@ -4,6 +4,7 @@ import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 
 
 class RegisterPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
       {
         'email': emailController.text,
         'password': passwordController.text,
+        'username': usernameController.text,
       });
       CustomToast(context).showToast('Account created successfully!', Icons.check_rounded);
       Navigator.pushReplacementNamed(context, '/home');
@@ -43,8 +45,8 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   TextEditingController emailController = TextEditingController();
-
   TextEditingController passwordController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +62,21 @@ class _RegisterPageState extends State<RegisterPage> {
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: TextField(
                   style: GoogleFonts.nunito(),
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Enter your name..",
+                  )
+                )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: TextField(
+                  style: GoogleFonts.nunito(),
                   controller: emailController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    // labelText: 'Email',
                     hintText: "Enter your email..",
                   )
                 )
@@ -72,16 +85,36 @@ class _RegisterPageState extends State<RegisterPage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextField(
+                  obscureText: true,
                   style: GoogleFonts.nunito(),
                   controller: passwordController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    // labelText: 'Password',
                     hintText: "Enter your password..",
                   )
                 )
               ),
-
+              Padding(padding: EdgeInsets.only(bottom: 16), 
+                child: RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.black)),
+                    children: <TextSpan>[
+                      TextSpan(text: 'Already have an account? '),
+                      TextSpan(
+                        text: 'Sign In',
+                        
+                        style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.blue)),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.pushReplacementNamed(context, '/login');
+                          }
+                      ),
+                    ],
+                  ),
+                )
+              ),
+              
+            
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 50),
@@ -89,7 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: () {
                   register(context);
                 },
-                child: Text('Sign In', style: GoogleFonts.nunito()),
+                child: Text('Sign Up', style: GoogleFonts.nunito()),
               )
             ]
           ),

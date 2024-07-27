@@ -34,6 +34,13 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: Icon(Icons.device_hub_rounded),
+              title: Text('My devices', style: GoogleFonts.nunito()),
+              onTap: () {
+                Navigator.pushReplacementNamed(context, '/devices');
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.manage_accounts_rounded),
               title: Text('My Account', style: GoogleFonts.nunito()),
               onTap: () {

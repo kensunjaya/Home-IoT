@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/custom_toast.dart';
+import 'package:flutter/gestures.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -31,7 +32,7 @@ class LoginPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Sign In', style: GoogleFonts.nunito(fontSize: 24), textAlign: TextAlign.left),
+              Text('Sign In to your account', style: GoogleFonts.nunito(fontSize: 24), textAlign: TextAlign.left),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: TextField(
@@ -48,6 +49,7 @@ class LoginPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextField(
+                  obscureText: true,
                   style: GoogleFonts.nunito(),
                   controller: passwordController,
                   decoration: InputDecoration(
@@ -55,6 +57,26 @@ class LoginPage extends StatelessWidget {
                     // labelText: 'Password',
                     hintText: "Enter your password..",
                   )
+                )
+              ),
+
+              Padding(padding: EdgeInsets.only(bottom: 16), 
+                child: RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.black)),
+                    children: <TextSpan>[
+                      TextSpan(text: "Don't have an account yet? "),
+                      TextSpan(
+                        text: 'Sign Up',
+                        
+                        style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.blue)),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.pushReplacementNamed(context, '/register');
+                          }
+                      ),
+                    ],
+                  ),
                 )
               ),
 

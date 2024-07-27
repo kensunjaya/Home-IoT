@@ -1,9 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:home_iot/pages/account.dart';
+import 'package:home_iot/pages/add_device.dart';
+import 'package:home_iot/pages/devices.dart';
 import 'package:home_iot/pages/home.dart';
+import 'package:home_iot/pages/login.dart';
+import 'package:home_iot/pages/register.dart';
 import 'package:home_iot/pages/settings.dart';
 import 'package:home_iot/widget_tree.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +17,8 @@ Future<void> main() async {
 }
 
 class HomeIoT extends StatelessWidget {
-  const HomeIoT({super.key});
+  HomeIoT({super.key});
+  
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +34,10 @@ class HomeIoT extends StatelessWidget {
         '/settings': (context) => SettingsPage(),
         '/account': (context) => AccountPage(),
         '/widget_tree': (context) => WidgetTree(),
+        '/devices': (context) => MyDevices(),
+        '/add_device': (context) => AddDevice(),
+        '/login': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
       },
     );
   }

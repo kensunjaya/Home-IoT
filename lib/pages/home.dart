@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser; // Import the html package
 import 'package:vibration/vibration.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+// import 'package:local_auth/local_auth.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late VlcPlayerController _vlcViewController;
   late Map<String, dynamic>? userData = {};
   late List devices = [];
+  // bool _isAuthenticated = false;
   bool _isInitialized = false;
 
   Future<bool> fetchStatus(String url) async {
@@ -66,6 +68,32 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeAsync() async {
+  //   final LocalAuthentication auth = LocalAuthentication();
+  // // ···
+  //   final bool canAuthenticateWithBiometrics = await auth.canCheckBiometrics;
+  //   final bool canAuthenticate = canAuthenticateWithBiometrics || await auth.isDeviceSupported();
+
+  //   if (canAuthenticate) {
+  //     try {
+  //         _isAuthenticated = await auth.authenticate(
+  //         localizedReason: 'Authenticate using biometrics',
+  //         options: const AuthenticationOptions(biometricOnly: true),
+  //       );
+  //     }
+  //     catch (e) {
+  //       print(e);
+  //       _isAuthenticated = true;
+  //     }
+      
+  //   }
+  //   else {
+  //     setState(() {
+  //       _isAuthenticated = true;
+  //     });
+  //   }
+
+    
+
     await fetchDevice();
     WidgetsBinding.instance.addObserver(this);
     _initializeVlcPlayer();
@@ -123,150 +151,155 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(Auth().currentUser!.email.toString(), style: GoogleFonts.nunito()), centerTitle: true),
+      appBar: AppBar(title: Text(userData?['header'], style: GoogleFonts.nunito()), centerTitle: true),
       drawer: AppDrawer(),
       body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(10),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: VlcPlayer(
-                controller: _vlcViewController,
-                aspectRatio: 4 / 3,
-                placeholder: Center(child: CircularProgressIndicator()),
-              ),
-            )
-          ),
-          Center(
-            child: Container(
-              margin: EdgeInsets.all(10),
-              height: 100,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: SizedBox.expand(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            Vibration.vibrate(duration: 200);
-                            CustomToast(context).showToast("Opening Gate", Icons.stop_rounded);
-                            await http.get(Uri.parse(userData?['gate']['open_url']));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, double.infinity),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: Icon(Icons.lock_open_rounded, size: 32),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: SizedBox.expand(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            Vibration.vibrate(duration: 200);
-                            CustomToast(context).showToast("Toggled Gate", Icons.stop_rounded);
-                            await http.get(Uri.parse(userData?['gate']['toggle_url']));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, double.infinity),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: Icon(Icons.stop_rounded, size: 32),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: SizedBox.expand(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            Vibration.vibrate(duration: 200);
-                            CustomToast(context).showToast("Closing Gate", Icons.stop_rounded);
-                            await http.get(Uri.parse(userData?['gate']['close_url']));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, double.infinity),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: Icon(Icons.lock_rounded, size: 32),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          ),
-          Expanded(
-            child: SizedBox(
-              height: 250,
-              child: GridView.builder(
-                itemCount: devices.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 2,
+        children: [ 
+          if (userData!.containsKey('gate'))
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: VlcPlayer(
+                  controller: _vlcViewController,
+                  aspectRatio: 4 / 3,
+                  placeholder: Center(child: CircularProgressIndicator()),
                 ),
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SizedBox(
-                    height: 50, // Fixed height
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 10,
-                            offset: Offset(4, 4),
-                          ),
-                        ],
-                      ),
+              )
+            ),
+
+          if (userData!.containsKey('gate'))
+            Center(
+              child: Container(
+                margin: EdgeInsets.all(10),
+                height: 100,
+                child: Row(
+                  children: [
+                    Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 10), 
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Icon(Icons.lightbulb_outline_rounded, size: 24),
-                            Text(devices[index]['name'], style: GoogleFonts.nunito(fontSize: 14)),
-                            Transform.scale(scale: 0.75, child: Switch(value: devices[index]['status'],
-                            onChanged: (bool value) {
-                              CustomToast(context).showToast("Turned ${value ? 'on' : 'off'} Lampu ${devices[index]['name']}", Icons.lightbulb_outline_rounded);
-                              setState(() async {
-                                devices[index]['status'] = value;
-                                if (value) {
-                                  await http.get(Uri.parse(devices[index]['on_url']));
-                                }
-                                else {
-                                  await http.get(Uri.parse(devices[index]['off_url']));
-                                }
-                                initStatus();
-                              });
-                            }))
+                        padding: EdgeInsets.all(10),
+                        child: SizedBox.expand(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Vibration.vibrate(duration: 200);
+                              CustomToast(context).showToast("Opening Gate", Icons.stop_rounded);
+                              await http.get(Uri.parse(userData?['gate']['open_url']));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(double.infinity, double.infinity),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            child: Icon(Icons.lock_open_rounded, size: 32),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: SizedBox.expand(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Vibration.vibrate(duration: 200);
+                              CustomToast(context).showToast("Toggled Gate", Icons.stop_rounded);
+                              await http.get(Uri.parse(userData?['gate']['toggle_url']));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(double.infinity, double.infinity),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            child: Icon(Icons.stop_rounded, size: 32),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: SizedBox.expand(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Vibration.vibrate(duration: 200);
+                              CustomToast(context).showToast("Closing Gate", Icons.stop_rounded);
+                              await http.get(Uri.parse(userData?['gate']['close_url']));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(double.infinity, double.infinity),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            child: Icon(Icons.lock_rounded, size: 32),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ),
+
+          if (userData!.containsKey('lamps'))
+            Expanded(
+              child: SizedBox(
+                height: 250,
+                child: GridView.builder(
+                  itemCount: devices.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 2,
+                  ),
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SizedBox(
+                      height: 50, // Fixed height
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: Offset(4, 4),
+                            ),
                           ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10), 
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Icon(Icons.lightbulb_outline_rounded, size: 24),
+                              Text(devices[index]['name'], style: GoogleFonts.nunito(fontSize: 14)),
+                              Transform.scale(scale: 0.75, child: Switch(value: devices[index]['status'],
+                              onChanged: (bool value) {
+                                CustomToast(context).showToast("Turned ${value ? 'on' : 'off'} Lampu ${devices[index]['name']}", Icons.lightbulb_outline_rounded);
+                                setState(() async {
+                                  devices[index]['status'] = value;
+                                  if (value) {
+                                    await http.get(Uri.parse(devices[index]['on_url']));
+                                  }
+                                  else {
+                                    await http.get(Uri.parse(devices[index]['off_url']));
+                                  }
+                                  initStatus();
+                                });
+                              }))
+                            ],
+                          )
                         )
-                      )
+                      ),
                     ),
                   ),
                 ),
-              ),
-            )
-          ),
+              )
+            ),
         ],
       ),
     );
