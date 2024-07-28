@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/firestore.dart';
@@ -47,30 +46,30 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
   Widget buildKeyValueTile(String key, dynamic value) {
     if (value is List) {
       return ExpansionTile(
-        title: Text(key.toUpperCase()),
+        title: Text(key.toUpperCase(), style: GoogleFonts.nunito()),
         children: value.map((item) {
           if (item is Map) {
             return ExpansionTile(
-              title: Text('Lampu ${item['name']}'),
+              title: Text('Lampu ${item['name']}', style: GoogleFonts.nunito()),
               children: item.entries.map((entry) => buildKeyValueTile(entry.key, entry.value)).toList(),
             );
           } else {
             return ListTile(
-              title: Text('Lampu ${item['name']}'),
-              subtitle: Text(item.toString()),
+              title: Text('Lampu ${item['name']}', style: GoogleFonts.nunito()),
+              subtitle: Text(item.toString(), style: GoogleFonts.nunito()),
             );
           }
         }).toList(),
       );
     } else if (value is Map) {
       return ExpansionTile(
-        title: Text(key.toUpperCase()),
+        title: Text(key.toUpperCase(), style: GoogleFonts.nunito()),
         children: value.entries.map((entry) => buildKeyValueTile(entry.key, entry.value)).toList(),
       );
     } else {
       return ListTile(
-        title: Text(key.toUpperCase()),
-        subtitle: Text(value.toString()),
+        title: Text(key.toUpperCase(), style: GoogleFonts.nunito()),
+        subtitle: Text(value.toString(), style: GoogleFonts.nunito()),
       );
     }
   }
@@ -95,13 +94,13 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Devices'), centerTitle: true),
+      appBar: AppBar(title: Text('My Devices', style: GoogleFonts.nunito()), centerTitle: true),
       drawer: const AppDrawer(),
       body: ListView(
         children: [
           Column(
             children: userData!.entries
-              .where((entry) => entry.key != 'email' && entry.key != 'password' && entry.key != 'username' && entry.key != 'header')
+              .where((entry) => entry.key != 'profile' && entry.key != 'header')
               .map((entry) => buildKeyValueTile(entry.key, entry.value))
               .toList(),
             ),

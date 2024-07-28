@@ -53,10 +53,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> fetchDevice() async {
+    
     userData = await service.get('users', Auth().currentUser!.email.toString());
-    devices = userData?['lamps'];
-    initStatus();
-    print(userData);
+    devices = userData?['lamps'] ?? [];
+    if (devices.isNotEmpty) {
+      print("initializing status");
+      initStatus();
+    }
   }
 
   @override
@@ -92,8 +95,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   //     });
   //   }
 
-    
-
     await fetchDevice();
     WidgetsBinding.instance.addObserver(this);
     _initializeVlcPlayer();
@@ -104,15 +105,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
 
   void _initializeVlcPlayer() {
-    _vlcViewController = VlcPlayerController.network(
-      userData?['gate']['preview'],
-      hwAcc: HwAcc.full,
-      autoPlay: true,
-      // options: VlcPlayerOptions(
-      //   advanced: VlcAdvancedOptions(
-      //   )
-      // ),
-    );
+    if (userData?['gate']?['preview'] != null) {
+      _vlcViewController = VlcPlayerController.network(
+        userData?['gate']['preview'],
+        hwAcc: HwAcc.full,
+        autoPlay: true,
+        // options: VlcPlayerOptions(
+        //   advanced: VlcAdvancedOptions(
+        //   )
+        // ),
+      );
+    }
   }
 
   @override
@@ -150,12 +153,49 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         )
       );
     }
+
+    if (userData!.keys.length < 3) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.nunito(fontSize: 24),
+                      children: [
+                        TextSpan(text: "Hello, ", style: GoogleFonts.nunito(fontWeight: FontWeight.normal, color: Colors.black)),
+                        TextSpan(text: "${userData!['profile']!['username']}", style: GoogleFonts.nunito(fontWeight: FontWeight.bold, color: Colors.black)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 40, left: 16, right: 16),
+                child: Text("Get started with adding device connections", style: GoogleFonts.nunito(fontSize: 24)),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/add_device');
+                },
+                child: Text('Add Device', style: GoogleFonts.nunito()),
+              ),
+            ],
+          ),
+        )
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: Text(userData?['header'], style: GoogleFonts.nunito()), centerTitle: true),
       drawer: AppDrawer(),
       body: Column(
         children: [ 
-          if (userData!.containsKey('gate'))
+          if (userData!.containsKey('gate') && userData!['gate']['preview'] != null)
             Padding(
               padding: EdgeInsets.all(10),
               child: ClipRRect(

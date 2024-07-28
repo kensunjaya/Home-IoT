@@ -7,7 +7,11 @@ class CloudFirestoreService {
 
   Future<void> add(String collectionName, String docId, Map<String, dynamic> data) async {
     // Add a new document with a generated ID
-    await db.collection(collectionName).doc(docId).set(data);
+    try {
+      await db.collection(collectionName).doc(docId).set(data);
+    } catch (error) {
+      print("Failed to add document: $error");
+    }
   }
 
   Future<Map<String, dynamic>?> get(String collection, String docId) async {
@@ -22,6 +26,14 @@ class CloudFirestoreService {
     } catch (error) {
       print("Failed to fetch document: $error");
       return null;
+    }
+  }
+
+  Future<void> update(String collection, String docId, Map<String, dynamic> data) async {
+    try {
+      await db.collection(collection).doc(docId).update(data);
+    } catch (error) {
+      print("Failed to update document: $error");
     }
   }
 }

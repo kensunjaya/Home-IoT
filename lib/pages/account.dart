@@ -93,7 +93,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
               ListTile(
                 leading: Icon(Icons.person_rounded, size: 36),
                 title: Text('Name', style: GoogleFonts.nunito()),
-                subtitle: Text(userData!['username'], style: GoogleFonts.nunito()),
+                subtitle: Text(userData?['profile']['username'], style: GoogleFonts.nunito()),
               ),
 
               ElevatedButton(
