@@ -47,7 +47,7 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
   Widget buildKeyValueTile(String key, dynamic value) {
     if (value is List) {
       return ExpansionTile(
-        title: Text(key.toUpperCase(), style: GoogleFonts.nunito()),
+        title: Text(key.toUpperCase(), style: GoogleFonts.nunito(fontWeight: FontWeight.bold)),
         children: value.map((item) {
           if (item is Map) {
             return ExpansionTile(
@@ -64,12 +64,12 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
       );
     } else if (value is Map) {
       return ExpansionTile(
-        title: Text(key.toUpperCase(), style: GoogleFonts.nunito()),
+        title: Text(key.toUpperCase(), style: GoogleFonts.nunito(fontWeight: FontWeight.bold)),
         children: value.entries.map((entry) => buildKeyValueTile(entry.key, entry.value)).toList(),
       );
     } else {
       return ListTile(
-        title: Text(key.toUpperCase(), style: GoogleFonts.nunito()),
+        title: Text(key.toUpperCase(), style: GoogleFonts.nunito(fontWeight: FontWeight.bold)),
         subtitle: Text(value.toString(), style: GoogleFonts.nunito()),
       );
     }

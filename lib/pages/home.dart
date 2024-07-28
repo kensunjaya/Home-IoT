@@ -22,12 +22,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late CloudFirestoreService service;
-  late VlcPlayerController _vlcViewController;
+  late VlcPlayerController _vlcViewController = VlcPlayerController.network(
+    'https://example.com/placeholder', // Placeholder URL
+    hwAcc: HwAcc.full,
+    autoPlay: false,
+  );
   late Map<String, dynamic>? userData = {};
   late List devices = [];
+  int videoStreamIndex = 0;
   int gateIndex = 0;
   // bool _isAuthenticated = false;
   bool _isInitialized = false;
+  bool _isSwiping = false;
 
   Future<bool> fetchStatus(String url) async {
     var parsedUrl = Uri.parse(url);
@@ -100,6 +106,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await fetchDevice();
     WidgetsBinding.instance.addObserver(this);
     _initializeVlcPlayer();
+    _vlcViewController.initialize();
     setState(() {
       _isInitialized = true;
     });
@@ -107,16 +114,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
 
   void _initializeVlcPlayer() {
-    if (userData?['gate']?[gateIndex]['preview'] != null) {
-      _vlcViewController = VlcPlayerController.network(
-        userData?['gate'][gateIndex]['preview'],
-        hwAcc: HwAcc.full,
-        autoPlay: true,
-        // options: VlcPlayerOptions(
-        //   advanced: VlcAdvancedOptions(
-        //   )
-        // ),
-      );
+    if (userData?['video_stream']?[videoStreamIndex]?['url'] != null) {
+      final newUrl = userData!['video_stream'][videoStreamIndex]['url'];
+      if (_vlcViewController.value.isInitialized) {
+        _vlcViewController.setMediaFromNetwork(newUrl);
+        _vlcViewController.play();
+      } else {
+        _vlcViewController = VlcPlayerController.network(
+          newUrl,
+          hwAcc: HwAcc.full,
+          autoPlay: true,
+        );
+        _vlcViewController.initialize().then((_) {
+          if (_vlcViewController.value.isInitialized) {
+            _vlcViewController.play();
+          }
+        });
+      }
     }
   }
 
@@ -197,16 +211,44 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       drawer: AppDrawer(),
       body: Column(
         children: [ 
-          if (userData!.containsKey('gate') && userData!['gate'][gateIndex]['preview'] != null)
+          if (userData!.containsKey('video_stream'))
             Padding(
               padding: EdgeInsets.all(10),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: VlcPlayer(
-                  controller: _vlcViewController,
-                  aspectRatio: 4 / 3,
-                  placeholder: Center(child: CircularProgressIndicator()),
-                ),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanUpdate: (details) {
+                  if (_isSwiping) return;
+                  _isSwiping = true;
+
+                  if (details.delta.dx > 0 && videoStreamIndex > 0) {
+                    setState(() {
+                      videoStreamIndex--;
+                    });
+                    _initializeVlcPlayer();
+
+                  } else if (details.delta.dx < 0 && videoStreamIndex < userData?['video_stream']?.length - 1) {
+                    setState(() {
+                      videoStreamIndex++;
+                    });
+                    _initializeVlcPlayer();
+                  }
+                  Future.delayed(Duration(milliseconds: 500), () {
+                    _isSwiping = false;
+                  });
+
+                  
+                },
+                child: 
+                IgnorePointer(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: VlcPlayer(
+                      controller: _vlcViewController,
+                      aspectRatio: 4 / 3,
+                      placeholder: Center(child: CircularProgressIndicator()),
+                    ),
+                  )
+                )
               )
             ),
 

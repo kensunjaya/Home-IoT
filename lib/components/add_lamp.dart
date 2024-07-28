@@ -56,7 +56,7 @@ class LampFields extends StatelessWidget {
             controller: lampOn,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
-              hintText: "An URL to turn on the lamp",
+              hintText: "URL to turn on the lamp",
             )
           )
         ),
@@ -67,7 +67,7 @@ class LampFields extends StatelessWidget {
             controller: lampOff,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
-              hintText: "An URL to turn off the lamp",
+              hintText: "URL to turn off the lamp",
             )
           )
         ),

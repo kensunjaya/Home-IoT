@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/add_gate.dart';
 import 'package:home_iot/components/add_lamp.dart';
+import 'package:home_iot/components/add_videostream.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 
@@ -15,12 +16,13 @@ class AddDevice extends StatefulWidget {
 }
 
 class _AddDeviceState extends State<AddDevice>{
-  static const List<String> typeList = <String>['Gate', 'Lamps'];
+  static const List<String> typeList = <String>['Video Stream', 'Gate', 'Lamps'];
   String dropdownValue = typeList.first;
   CloudFirestoreService? service;
 
   final GateFields gateFields = GateFields();
   final LampFields lampFields = LampFields();
+  final VideoStreamFields videoStreamFields = VideoStreamFields();
 
   void handleAddAction(Map<String, dynamic> data) {
     try {
@@ -51,7 +53,7 @@ class _AddDeviceState extends State<AddDevice>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Device'),
+        title: Text('Add Device', style: GoogleFonts.nunito(), textAlign: TextAlign.center),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -91,6 +93,8 @@ class _AddDeviceState extends State<AddDevice>{
                   gateFields,
                 if (dropdownValue == 'Lamps')
                   lampFields,
+                if (dropdownValue == 'Video Stream')
+                  videoStreamFields,
 
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
@@ -104,8 +108,11 @@ class _AddDeviceState extends State<AddDevice>{
                         else if (dropdownValue == 'Gate') {
                           handleAddAction(gateFields.getText());
                         }
+                        else if (dropdownValue == 'Video Stream') {
+                          handleAddAction(videoStreamFields.getText());
+                        }
                       },
-                      child: Text('Confirm Add Device'),
+                      child: Text('Confirm Add Device', style: GoogleFonts.nunito()),
                     ),
                   )
                 ),
