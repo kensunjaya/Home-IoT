@@ -5,6 +5,7 @@ import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:home_iot/pages/add_device.dart';
 import 'package:home_iot/pages/drawer.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser; // Import the html package
@@ -24,6 +25,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late VlcPlayerController _vlcViewController;
   late Map<String, dynamic>? userData = {};
   late List devices = [];
+  int gateIndex = 0;
   // bool _isAuthenticated = false;
   bool _isInitialized = false;
 
@@ -105,9 +107,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
 
   void _initializeVlcPlayer() {
-    if (userData?['gate']?['preview'] != null) {
+    if (userData?['gate']?[gateIndex]['preview'] != null) {
       _vlcViewController = VlcPlayerController.network(
-        userData?['gate']['preview'],
+        userData?['gate'][gateIndex]['preview'],
         hwAcc: HwAcc.full,
         autoPlay: true,
         // options: VlcPlayerOptions(
@@ -181,7 +183,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/add_device');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
                 },
                 child: Text('Add Device', style: GoogleFonts.nunito()),
               ),
@@ -195,7 +197,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       drawer: AppDrawer(),
       body: Column(
         children: [ 
-          if (userData!.containsKey('gate') && userData!['gate']['preview'] != null)
+          if (userData!.containsKey('gate') && userData!['gate'][gateIndex]['preview'] != null)
             Padding(
               padding: EdgeInsets.all(10),
               child: ClipRRect(
@@ -223,7 +225,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             onPressed: () async {
                               Vibration.vibrate(duration: 200);
                               CustomToast(context).showToast("Opening Gate", Icons.stop_rounded);
-                              await http.get(Uri.parse(userData?['gate']['open_url']));
+                              await http.get(Uri.parse(userData?['gate'][gateIndex]['open_url']));
                             },
                             style: ElevatedButton.styleFrom(
                               minimumSize: Size(double.infinity, double.infinity),
@@ -244,7 +246,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             onPressed: () async {
                               Vibration.vibrate(duration: 200);
                               CustomToast(context).showToast("Toggled Gate", Icons.stop_rounded);
-                              await http.get(Uri.parse(userData?['gate']['toggle_url']));
+                              await http.get(Uri.parse(userData?['gate'][gateIndex]['toggle_url']));
                             },
                             style: ElevatedButton.styleFrom(
                               minimumSize: Size(double.infinity, double.infinity),
@@ -265,7 +267,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             onPressed: () async {
                               Vibration.vibrate(duration: 200);
                               CustomToast(context).showToast("Closing Gate", Icons.stop_rounded);
-                              await http.get(Uri.parse(userData?['gate']['close_url']));
+                              await http.get(Uri.parse(userData?['gate'][gateIndex]['close_url']));
                             },
                             style: ElevatedButton.styleFrom(
                               minimumSize: Size(double.infinity, double.infinity),
@@ -316,10 +318,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Icon(Icons.lightbulb_outline_rounded, size: 24),
-                              Text(devices[index]['name'], style: GoogleFonts.nunito(fontSize: 14)),
+                              Text(devices[index]['label'], style: GoogleFonts.nunito(fontSize: 14)),
                               Transform.scale(scale: 0.75, child: Switch(value: devices[index]['status'],
                               onChanged: (bool value) {
-                                CustomToast(context).showToast("Turned ${value ? 'on' : 'off'} Lampu ${devices[index]['name']}", Icons.lightbulb_outline_rounded);
+                                CustomToast(context).showToast("Turned ${value ? 'on' : 'off'} Lampu ${devices[index]['label']}", Icons.lightbulb_outline_rounded);
                                 setState(() async {
                                   devices[index]['status'] = value;
                                   if (value) {

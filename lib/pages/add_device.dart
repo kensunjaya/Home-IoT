@@ -3,23 +3,42 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/add_gate.dart';
+import 'package:home_iot/components/add_lamp.dart';
+import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 
 class AddDevice extends StatefulWidget {
-  const AddDevice({super.key});
+  final Map<String, dynamic> userData;
+  const AddDevice({super.key, required this.userData});
   @override
   State<AddDevice> createState() => _AddDeviceState();
 }
 
-class _AddDeviceState extends State<AddDevice> {
+class _AddDeviceState extends State<AddDevice>{
   static const List<String> typeList = <String>['Gate', 'Lamps'];
   String dropdownValue = typeList.first;
   CloudFirestoreService? service;
 
-  GateFields gateFields = GateFields();
+  final GateFields gateFields = GateFields();
+  final LampFields lampFields = LampFields();
 
   void handleAddAction(Map<String, dynamic> data) {
-    service?.update('users', Auth().currentUser!.email.toString(), data);
+    try {
+      final deviceData = widget.userData[data.keys.first] ?? [];
+      print(deviceData);
+      deviceData.add(data[data.keys.first]);
+      service?.update('users', Auth().currentUser!.email.toString(), {
+        data.keys.first: deviceData,
+      });
+      CustomToast(context).showToast('Device added successfully!', Icons.check_rounded);
+      Navigator.pop(context);
+    }
+    catch (e) {
+      print(e);
+      CustomToast(context).showToast(e.hashCode.toString(), Icons.error_rounded);
+    }
+    
+    // service?.update('users', Auth().currentUser!.email.toString(), data);
   }
 
   @override
@@ -42,7 +61,6 @@ class _AddDeviceState extends State<AddDevice> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: double.infinity,
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
@@ -71,16 +89,25 @@ class _AddDeviceState extends State<AddDevice> {
 
                 if (dropdownValue == 'Gate')
                   gateFields,
+                if (dropdownValue == 'Lamps')
+                  lampFields,
 
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print(gateFields.getText());
-                      handleAddAction(gateFields.getText());
-                    },
-                    child: Text('Add Gate'),
-                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (dropdownValue == 'Lamps') {
+                          handleAddAction(lampFields.getText());
+                        }
+                        else if (dropdownValue == 'Gate') {
+                          handleAddAction(gateFields.getText());
+                        }
+                      },
+                      child: Text('Confirm Add Device'),
+                    ),
+                  )
                 ),
               ],
             ),

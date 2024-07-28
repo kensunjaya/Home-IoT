@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/firestore.dart';
+import 'package:home_iot/pages/add_device.dart';
 import 'package:home_iot/pages/drawer.dart';
 
 class MyDevices extends StatefulWidget {
@@ -50,12 +51,12 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
         children: value.map((item) {
           if (item is Map) {
             return ExpansionTile(
-              title: Text('Lampu ${item['name']}', style: GoogleFonts.nunito()),
+              title: Text('${item['label']}', style: GoogleFonts.nunito()),
               children: item.entries.map((entry) => buildKeyValueTile(entry.key, entry.value)).toList(),
             );
           } else {
             return ListTile(
-              title: Text('Lampu ${item['name']}', style: GoogleFonts.nunito()),
+              title: Text('${item['label']}', style: GoogleFonts.nunito()),
               subtitle: Text(item.toString(), style: GoogleFonts.nunito()),
             );
           }
@@ -107,7 +108,7 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
             Padding(padding: EdgeInsets.all(16.0), child:
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/add_device');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
                 },
                 child: Text('Add another device', style: GoogleFonts.nunito()),
               )

@@ -18,6 +18,10 @@ class _RegisterPageState extends State<RegisterPage> {
   CloudFirestoreService? service;
 
   Future<void> register(BuildContext context) async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty || usernameController.text.isEmpty || labelController.text.isEmpty) {
+      CustomToast(context).showToast('Please fill in all fields!', Icons.error_rounded);
+      return;
+    }
     try {
       await Auth().createUserWithEmailAndPassword(
         email: emailController.text,
@@ -30,7 +34,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'password': passwordController.text,
           'username': usernameController.text,
         },
-        'header': "Home"
+        'header': emailController.text
       });
       CustomToast(context).showToast('Account created successfully!', Icons.check_rounded);
       Navigator.pushReplacementNamed(context, '/home');
@@ -50,6 +54,7 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
+  TextEditingController labelController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +86,18 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: "Enter your email..",
+                  )
+                )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: TextField(
+                  style: GoogleFonts.nunito(),
+                  controller: labelController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Enter a collection name..",
                   )
                 )
               ),

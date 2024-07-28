@@ -35,7 +35,6 @@ class HomeIoT extends StatelessWidget {
         '/account': (context) => AccountPage(),
         '/widget_tree': (context) => WidgetTree(),
         '/devices': (context) => MyDevices(),
-        '/add_device': (context) => AddDevice(),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
       },
