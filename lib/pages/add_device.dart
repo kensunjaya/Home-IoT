@@ -96,6 +96,7 @@ class _AddDeviceState extends State<AddDevice>{
                 if (dropdownValue == 'Video Stream')
                   videoStreamFields,
 
+                if (widget.userData['profile']['organization']['isOwner'])
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: SizedBox(

@@ -63,6 +63,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> fetchDevice() async {
     
     userData = await service.get('users', Auth().currentUser!.email.toString());
+    if (userData!['profile']['organization'].isNotEmpty && !userData!['profile']['organization']['isOwner']) {
+      userData = await service.fetchOrganizationData(userData!['profile']['organization']['ref'] as DocumentReference);
+    }
     devices = userData?['lamps'] ?? [];
     if (devices.isNotEmpty) {
       print("initializing status");
@@ -112,18 +115,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   });
                   userData!['profile']['organization'] = {
                     'label': organizationName,
-                    'members': [],
                     'isOwner': false,
+                    'ref': FirebaseFirestore.instance.collection('users').doc(sender)
                   };
                   userData!['profile']['invitation'] = {};
                   await service.update('users', Auth().currentUser!.email.toString(), {
                     'profile': userData!['profile']
                   });
+                  CustomToast(context).showToast('You are now member of $organizationName', Icons.check_rounded);
                 } catch (e) {
                   print(e);
-                }
-                
+                } 
                 Navigator.of(context).pop();
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
               },
             ),
           ],

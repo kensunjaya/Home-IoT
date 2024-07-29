@@ -68,8 +68,9 @@ class _AddOrganizationState extends State<AddOrganization> {
       else {
         widget.userData['profile']['organization'] = {
           'label': organizationName.text,
-          'members': [],
           'isOwner': true,
+          'members': [],
+          'ref': FirebaseFirestore.instance.collection('users').doc(Auth().currentUser!.email.toString())
         };
         await service?.update('users', Auth().currentUser!.email.toString(), {
           'profile': widget.userData['profile']

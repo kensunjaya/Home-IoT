@@ -43,6 +43,21 @@ class CloudFirestoreService {
       .catchError((error) => print(error));
   }
 
+  Future<Map<String, dynamic>?> fetchOrganizationData(DocumentReference docRef) async {
+    try {
+      DocumentSnapshot snapshot = await docRef.get();
+      if (snapshot.exists) {
+        return snapshot.data() as Map<String, dynamic>?;
+      } else {
+        print('No such document!');
+        return null;
+      }
+    } catch (error) {
+      print("Failed to fetch document: $error");
+      return null;
+    }
+  }
+
   Future<void> update(String collection, String docId, Map<String, dynamic> data) async {
     try {
       await db.collection(collection).doc(docId).update(data);
