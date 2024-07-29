@@ -103,7 +103,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           actions: <Widget>[
             TextButton(
               child: Text('Reject', style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
-              onPressed: () {
+              onPressed: () async {
+                userData!['profile']['invitation'] = {};
+                await service.update('users', Auth().currentUser!.email.toString(), {
+                  'profile': userData!['profile']
+                });
                 Navigator.of(context).pop();
               },
             ),

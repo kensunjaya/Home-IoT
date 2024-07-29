@@ -96,12 +96,15 @@ class _AddDeviceState extends State<AddDevice>{
                 if (dropdownValue == 'Video Stream')
                   videoStreamFields,
 
-                if (widget.userData['profile']['organization']['isOwner'])
+                // if (widget.userData['profile']['organization']['isOwner'])
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
+                  padding: const EdgeInsets.only(top: 16.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 50),
+                      ),
                       onPressed: () {
                         if (dropdownValue == 'Lamps') {
                           handleAddAction(lampFields.getText());

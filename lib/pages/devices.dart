@@ -105,14 +105,17 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
               .map((entry) => buildKeyValueTile(entry.key, entry.value))
               .toList(),
             ),
-            Padding(padding: EdgeInsets.all(16.0), child:
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
-                },
-                child: Text('Add another device', style: GoogleFonts.nunito()),
-              )
-            ),
+          Padding(padding: EdgeInsets.all(16.0), 
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50),
+              ),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
+              },
+              child: Text('Add another device', style: GoogleFonts.nunito()),
+            )
+          )
         ]
       ),
     );

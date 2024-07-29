@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.kensunjaya.homeiot">
     <application
-        android:label="home_iot"
+        android:label="Home IoT"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

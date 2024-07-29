@@ -107,16 +107,17 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                 }
                   
               ),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50),
-                ),
-                onPressed: () {
-                  signout(context);
-                },
-                child: Text('Sign Out', style: GoogleFonts.nunito()),
-              )
+              Padding(padding:EdgeInsets.only(top: 16),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                  onPressed: () {
+                    signout(context);
+                  },
+                  child: Text('Sign Out', style: GoogleFonts.nunito()),
+                )
+              ),
             ]
           ),
         )
