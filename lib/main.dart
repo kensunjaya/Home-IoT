@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:home_iot/pages/account.dart';
-import 'package:home_iot/pages/add_device.dart';
 import 'package:home_iot/pages/devices.dart';
 import 'package:home_iot/pages/home.dart';
 import 'package:home_iot/pages/login.dart';
@@ -17,7 +16,7 @@ Future<void> main() async {
 }
 
 class HomeIoT extends StatelessWidget {
-  HomeIoT({super.key});
+  const HomeIoT({super.key});
   
 
   @override
