@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
+import 'package:home_iot/components/add_organization.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 import 'package:home_iot/pages/drawer.dart';
 
 class AccountPage extends StatefulWidget {
-  AccountPage({super.key});
+  const AccountPage({super.key});
 
   @override
   State<AccountPage> createState() => _AccountPageState();
@@ -94,6 +95,17 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                 leading: Icon(Icons.person_rounded, size: 36),
                 title: Text('Name', style: GoogleFonts.nunito()),
                 subtitle: Text(userData?['profile']['username'], style: GoogleFonts.nunito()),
+              ),
+              ListTile(
+                leading: Icon(Icons.group_rounded, size: 36),
+                title: Text('Organization', style: GoogleFonts.nunito()),
+                subtitle: Text(userData?['profile']['organization'].isNotEmpty ? userData!['profile']['organization']['label'] : 'Tap to create', style: GoogleFonts.nunito()),
+                onTap: () => {
+                  if ((userData?['profile']['organization'].isEmpty) || (userData?['profile']['organization'].isNotEmpty && userData?['profile']['organization']['isOwner'])) {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AddOrganization(userData: userData!)))
+                  },
+                }
+                  
               ),
 
               ElevatedButton(

@@ -75,7 +75,61 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.initState();
     WakelockPlus.enable();
     service = CloudFirestoreService(FirebaseFirestore.instance);
-    _initializeAsync(); 
+    _initializeAsync();
+  }
+
+  Future<void> _showInvitationDialog(String sender, String organizationName, String username) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Hi, $username', style: GoogleFonts.nunito()),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You are being invited to $organizationName by $sender', style: GoogleFonts.nunito()),
+                Text('This will allow you to gain access to their registered devices', style: GoogleFonts.nunito()),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Reject', style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Accept', style: GoogleFonts.nunito(fontWeight: FontWeight.bold)),
+              onPressed: () async {
+                try {
+                  Map<String, dynamic>? senderData = await service.get('users', sender);
+                  Map<String, dynamic> temp = senderData!['profile'];
+                  temp['organization']['members'].add(Auth().currentUser!.email.toString());
+                  await service.update('users', sender, {
+                    'profile': temp
+                  });
+                  userData!['profile']['organization'] = {
+                    'label': organizationName,
+                    'members': [],
+                    'isOwner': false,
+                  };
+                  userData!['profile']['invitation'] = {};
+                  await service.update('users', Auth().currentUser!.email.toString(), {
+                    'profile': userData!['profile']
+                  });
+                } catch (e) {
+                  print(e);
+                }
+                
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _initializeAsync() async {
@@ -110,6 +164,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     setState(() {
       _isInitialized = true;
     });
+    if (userData!['profile']['invitation'].isNotEmpty) {
+      _showInvitationDialog(userData!['profile']['invitation']['sender'], userData!['profile']['invitation']['organization'], userData!['profile']['username']);
+    }
   }
 
 
@@ -207,7 +264,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(userData?['header'], style: GoogleFonts.nunito()), centerTitle: true),
+      appBar: AppBar(title: Text(userData?['video_stream']?[videoStreamIndex]?['label'] ?? userData?['profile']['label'], style: GoogleFonts.nunito()), centerTitle: true),
       drawer: AppDrawer(),
       body: Column(
         children: [ 

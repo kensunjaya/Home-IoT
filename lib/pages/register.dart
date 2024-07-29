@@ -33,8 +33,9 @@ class _RegisterPageState extends State<RegisterPage> {
           'email': emailController.text,
           'password': passwordController.text,
           'username': usernameController.text,
+          'header': labelController.text,
+          'organization': {},
         },
-        'header': emailController.text
       });
       CustomToast(context).showToast('Account created successfully!', Icons.check_rounded);
       Navigator.pushReplacementNamed(context, '/home');

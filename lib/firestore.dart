@@ -29,6 +29,20 @@ class CloudFirestoreService {
     }
   }
 
+  Future<List> fetchUsers(String s) {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    List userList = [];
+    return users.get()
+      .then((QuerySnapshot snapshot) {
+        for (var doc in snapshot.docs) {
+          userList.add(doc.id);
+        }
+        return userList;
+      })
+      // ignore: invalid_return_type_for_catch_error
+      .catchError((error) => print(error));
+  }
+
   Future<void> update(String collection, String docId, Map<String, dynamic> data) async {
     try {
       await db.collection(collection).doc(docId).update(data);
