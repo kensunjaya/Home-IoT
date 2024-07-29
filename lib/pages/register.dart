@@ -35,6 +35,8 @@ class _RegisterPageState extends State<RegisterPage> {
           'username': usernameController.text,
           'header': labelController.text,
           'organization': {},
+          'invitation': {},
+          'useOrganization': false,
         },
       });
       CustomToast(context).showToast('Account created successfully!', Icons.check_rounded);

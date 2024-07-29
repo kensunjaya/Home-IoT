@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // bool _isAuthenticated = false;
   bool _isInitialized = false;
   bool _isSwiping = false;
+  bool _isOwner = true;
 
   Future<bool> fetchStatus(String url) async {
     var parsedUrl = Uri.parse(url);
@@ -61,10 +62,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> fetchDevice() async {
-    
     userData = await service.get('users', Auth().currentUser!.email.toString());
-    if (userData!['profile']['organization'].isNotEmpty && !userData!['profile']['organization']['isOwner']) {
+    if ((userData!['profile']['organization'].isNotEmpty && !userData!['profile']['organization']['isOwner']) && userData!['profile']['useOrganization']) {
+      _isOwner = false;
       userData = await service.fetchOrganizationData(userData!['profile']['organization']['ref'] as DocumentReference);
+    }
+    else if (userData!['profile']['organization'].isNotEmpty && !userData!['profile']['organization']['isOwner']) {
+      _isOwner = false;
     }
     devices = userData?['lamps'] ?? [];
     if (devices.isNotEmpty) {
@@ -119,6 +123,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     'ref': FirebaseFirestore.instance.collection('users').doc(sender)
                   };
                   userData!['profile']['invitation'] = {};
+                  userData!['profile']['useOrganization'] = true;
                   await service.update('users', Auth().currentUser!.email.toString(), {
                     'profile': userData!['profile']
                   });
@@ -269,7 +274,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(userData?['video_stream']?[videoStreamIndex]?['label'] ?? userData?['profile']['label'], style: GoogleFonts.nunito()), centerTitle: true),
+      appBar: AppBar(
+        title: Text(userData?['video_stream']?[videoStreamIndex]?['label'] ?? userData?['profile']['label'], style: GoogleFonts.nunito()), 
+        centerTitle: true,
+        actions: [
+          if (userData!['profile']['organization'].isNotEmpty && !_isOwner)
+          IconButton(
+            icon: Icon(Icons.swap_horiz_rounded),
+            onPressed: () {
+              setState(() async {
+                Map<String, dynamic>? temp = await service.get('users', Auth().currentUser!.email.toString());
+                temp!['profile']['useOrganization'] = !temp['profile']['useOrganization'];
+                await service.update('users', Auth().currentUser!.email.toString(), {
+                  'profile': temp['profile']
+                });
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+              });
+            },
+          ),
+        ],
+      ),
+
       drawer: AppDrawer(),
       body: Column(
         children: [ 
