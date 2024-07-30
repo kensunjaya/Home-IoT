@@ -9,7 +9,10 @@ class LampFields extends StatelessWidget {
   final TextEditingController lampOn = TextEditingController();
   final TextEditingController lampOff = TextEditingController();
 
-  Map<String, dynamic> getText() {
+  Map<String, dynamic>? getText() {
+    if (lampLabel.text.isEmpty || lampStatus.text.isEmpty || lampOn.text.isEmpty || lampOff.text.isEmpty) {
+      return null;
+    }
     return {'lamps': 
       {
         'label': lampLabel.text,

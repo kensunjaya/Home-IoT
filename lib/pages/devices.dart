@@ -95,7 +95,7 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('My Devices', style: GoogleFonts.nunito()), centerTitle: true),
+      appBar: AppBar(title: Text('My Widgets', style: GoogleFonts.nunito()), centerTitle: true),
       drawer: const AppDrawer(),
       body: ListView(
         children: [
@@ -113,7 +113,7 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
               },
-              child: Text('Add another device', style: GoogleFonts.nunito()),
+              child: Text('Add another widget', style: GoogleFonts.nunito()),
             )
           )
         ]

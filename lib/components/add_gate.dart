@@ -9,7 +9,10 @@ class GateFields extends StatelessWidget {
   final TextEditingController gateOpenURL = TextEditingController();
   final TextEditingController gateCloseURL = TextEditingController();
 
-  Map<String, dynamic> getText() {
+  Map<String, dynamic>? getText() {
+    if (gateNameController.text.isEmpty || gateOpenURL.text.isEmpty || gateCloseURL.text.isEmpty) {
+      return null;
+    }
     return {'gate': 
       {
         'label': gateNameController.text,
@@ -66,7 +69,7 @@ class GateFields extends StatelessWidget {
             controller: gateToggleURL,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
-              hintText: "URL to toggle the gate",
+              hintText: "URL to toggle the gate (optional)",
             )
           )
         ),

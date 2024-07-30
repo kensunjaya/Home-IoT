@@ -8,7 +8,10 @@ class ButtonFields extends StatelessWidget {
   final TextEditingController buttonLabel = TextEditingController();
   final TextEditingController buttonActionOnLongPressURL = TextEditingController();
 
-  Map<String, dynamic> getText() {
+  Map<String, dynamic>? getText() {
+    if (buttonActionURL.text.isEmpty || buttonLabel.text.isEmpty) {
+      return null;
+    }
     return {'button': 
       {
         'label': buttonLabel.text,

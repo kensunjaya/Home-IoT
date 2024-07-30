@@ -9,13 +9,16 @@ import 'package:home_iot/pages/add_device.dart';
 import 'package:home_iot/pages/drawer.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser; // Import the html package
+import 'package:local_auth/local_auth.dart';
 import 'package:vibration/vibration.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 // import 'package:local_auth/local_auth.dart';
 
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final bool initialPage;
+
+  const HomePage({super.key, required this.initialPage});
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -29,9 +32,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   );
   late Map<String, dynamic>? userData = {};
   late List devices = [];
+  String loadingMessage = 'Loading ..';
   int videoStreamIndex = 0;
   int gateIndex = 0;
-  // bool _isAuthenticated = false;
+  bool _isAuthenticated = false;
   bool _isInitialized = false;
   bool _isSwiping = false;
   bool _isOwner = true;
@@ -137,7 +141,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 } 
                 Navigator.of(context).pop();
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(initialPage: false)));
               },
             ),
           ],
@@ -147,31 +151,50 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeAsync() async {
-  //   final LocalAuthentication auth = LocalAuthentication();
-  // // ···
-  //   final bool canAuthenticateWithBiometrics = await auth.canCheckBiometrics;
-  //   final bool canAuthenticate = canAuthenticateWithBiometrics || await auth.isDeviceSupported();
-
-  //   if (canAuthenticate) {
-  //     try {
-  //         _isAuthenticated = await auth.authenticate(
-  //         localizedReason: 'Authenticate using biometrics',
-  //         options: const AuthenticationOptions(biometricOnly: true),
-  //       );
-  //     }
-  //     catch (e) {
-  //       print(e);
-  //       _isAuthenticated = true;
-  //     }
-      
-  //   }
-  //   else {
-  //     setState(() {
-  //       _isAuthenticated = true;
-  //     });
-  //   }
-
     await fetchDevice();
+
+    if (userData!['profile']['biometric_auth']) {
+      final LocalAuthentication auth = LocalAuthentication();
+      bool canAuthenticate = false;
+
+      try {
+        canAuthenticate = await auth.canCheckBiometrics || await auth.isDeviceSupported();
+      } catch (e) {
+        CustomToast(context).showToast('Error checking biometric support', Icons.error_rounded);
+        print('Error checking biometric support: $e');
+      }
+
+      // authentication using biometric
+      if (canAuthenticate && widget.initialPage) {
+        setState(() {
+          loadingMessage = 'Waiting for authentication ..';
+        });
+        try {
+          _isAuthenticated = await auth.authenticate(
+            localizedReason: 'Authenticate using biometrics',
+            options: const AuthenticationOptions(),
+          );
+        } catch (e) {
+          print(e);
+          Vibration.vibrate(duration: 1000);
+          CustomToast(context).showToast("Cannot find any biometric devices", Icons.error_rounded);
+          _isAuthenticated = true;
+        }
+        
+      }
+      else {
+        setState(() {
+          _isAuthenticated = true;
+        });
+      }
+    }
+    else {
+      setState(() {
+        _isAuthenticated = true;
+      });
+    }
+
+    
     WidgetsBinding.instance.addObserver(this);
     _initializeVlcPlayer();
     _vlcViewController.initialize();
@@ -224,7 +247,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
+    if (!_isInitialized || !_isAuthenticated) {
       return Scaffold(
         body: Center(
           child: Column(
@@ -232,7 +255,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             children: [
               Padding(
                 padding: EdgeInsets.only(bottom: 40),
-                child: Text('Loading ..', style: GoogleFonts.nunito(fontSize: 24)),
+                child: Text(loadingMessage, style: GoogleFonts.nunito(fontSize: 24)),
               ),
               CircularProgressIndicator(),
             ],
@@ -293,7 +316,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   'profile': temp['profile']
                 });
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(initialPage: false)));
               });
             },
           ),
@@ -419,7 +442,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
           if (userData!.containsKey('lamps'))
             SizedBox(
-              height: 110 * (devices.length / 2),
+              height: (110 * (devices.length / 2).ceil()).toDouble(),
               child: GridView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: devices.length,
@@ -476,7 +499,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ),
           if (userData!.containsKey('button'))
               SizedBox(
-                height: (userData!['button'].length / 3) * 150,
+                
+                height: ((userData!['button'].length / 3).ceil() * 100).toDouble(),
                 child: GridView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: userData!['button'].length,

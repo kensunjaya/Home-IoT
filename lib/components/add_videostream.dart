@@ -7,7 +7,10 @@ class VideoStreamFields extends StatelessWidget {
   final TextEditingController videoStreamURL = TextEditingController();
   final TextEditingController videoStreamLabel = TextEditingController();
 
-  Map<String, dynamic> getText() {
+  Map<String, dynamic>? getText() {
+    if (videoStreamURL.text.isEmpty || videoStreamLabel.text.isEmpty) {
+      return null;
+    }
     return {'video_stream': 
       {
         'label': videoStreamLabel.text,

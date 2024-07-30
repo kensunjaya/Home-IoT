@@ -26,14 +26,18 @@ class _AddDeviceState extends State<AddDevice>{
   final VideoStreamFields videoStreamFields = VideoStreamFields();
   final ButtonFields buttonFields = ButtonFields();
 
-  void handleAddAction(Map<String, dynamic> data) {
+  void handleAddAction(Map<String, dynamic>? data) {
+    if (data == null) {
+      CustomToast(context).showToast('Please fill in all required fields!', Icons.error_rounded);
+      return;
+    }
     try {
-      final deviceData = widget.userData[data.keys.first] ?? [];
+      final deviceData = widget.userData[data!.keys.first] ?? [];
       deviceData.add(data[data.keys.first]);
       service?.update('users', Auth().currentUser!.email.toString(), {
         data.keys.first: deviceData,
       });
-      CustomToast(context).showToast('Device added successfully!', Icons.check_rounded);
+      CustomToast(context).showToast('Widget added successfully!', Icons.check_rounded);
       Navigator.pop(context);
       Navigator.pop(context);
       Navigator.pushNamed(context, '/devices');
@@ -42,8 +46,6 @@ class _AddDeviceState extends State<AddDevice>{
       print(e);
       CustomToast(context).showToast(e.hashCode.toString(), Icons.error_rounded);
     }
-    
-    // service?.update('users', Auth().currentUser!.email.toString(), data);
   }
 
   @override
@@ -56,7 +58,7 @@ class _AddDeviceState extends State<AddDevice>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Device', style: GoogleFonts.nunito(), textAlign: TextAlign.center),
+        title: Text('Add Widget', style: GoogleFonts.nunito(), textAlign: TextAlign.center),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -124,7 +126,7 @@ class _AddDeviceState extends State<AddDevice>{
                           handleAddAction(buttonFields.getText());
                         }
                       },
-                      child: Text('Confirm Add Device', style: GoogleFonts.nunito()),
+                      child: Text('Confirm add widget', style: GoogleFonts.nunito()),
                     ),
                   )
                 ),

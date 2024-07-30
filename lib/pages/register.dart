@@ -32,7 +32,6 @@ class _RegisterPageState extends State<RegisterPage> {
       {'profile': 
         {
           'email': emailController.text,
-          'password': passwordController.text,
           'username': usernameController.text,
           'header': labelController.text,
           'organization': {},

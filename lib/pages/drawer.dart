@@ -35,7 +35,7 @@ class AppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(Icons.device_hub_rounded),
-              title: Text('My devices', style: GoogleFonts.nunito()),
+              title: Text('My Widgets', style: GoogleFonts.nunito()),
               onTap: () {
                 Navigator.pushReplacementNamed(context, '/devices');
               },

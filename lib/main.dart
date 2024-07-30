@@ -29,7 +29,7 @@ class HomeIoT extends StatelessWidget {
       ),
       home: WidgetTree(),
       routes: {
-        '/home': (context) => HomePage(),
+        '/home': (context) => HomePage(initialPage: false),
         '/settings': (context) => SettingsPage(),
         '/account': (context) => AccountPage(),
         '/widget_tree': (context) => WidgetTree(),
