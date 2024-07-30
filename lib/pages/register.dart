@@ -37,6 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'organization': {},
           'invitation': {},
           'useOrganization': false,
+          'biometric_auth': false,
         },
       });
       CustomToast(context).showToast('Account created successfully!', Icons.check_rounded);

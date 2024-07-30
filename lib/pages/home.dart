@@ -12,10 +12,10 @@ import 'package:html/parser.dart' as html_parser; // Import the html package
 import 'package:local_auth/local_auth.dart';
 import 'package:vibration/vibration.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-// import 'package:local_auth/local_auth.dart';
 
 
 class HomePage extends StatefulWidget {
+  // ask for biometric auth only if it's the initial page
   final bool initialPage;
 
   const HomePage({super.key, required this.initialPage});
@@ -99,14 +99,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('You are being invited to $organizationName by $sender', style: GoogleFonts.nunito()),
-                Text('This will allow you to gain access to their registered devices', style: GoogleFonts.nunito()),
+                Text('You have been invited to join $organizationName by $sender.', style: GoogleFonts.nunito()),
+                Text('Accepting the invitation will allow you to access their exclusive widgets.', style: GoogleFonts.nunito()),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Reject', style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+              child: Text('Reject', style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16))),
               onPressed: () async {
                 userData!['profile']['invitation'] = {};
                 await service.update('users', Auth().currentUser!.email.toString(), {
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               },
             ),
             TextButton(
-              child: Text('Accept', style: GoogleFonts.nunito(fontWeight: FontWeight.bold)),
+              child: Text('Accept', style: GoogleFonts.nunito(fontWeight: FontWeight.bold, fontSize: 16)),
               onPressed: () async {
                 try {
                   Map<String, dynamic>? senderData = await service.get('users', sender);
@@ -264,8 +264,29 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
     }
 
-    if (userData!.keys.length < 3) {
+    if (userData!.keys.length < 2) {
       return Scaffold(
+        drawer: AppDrawer(),
+        appBar: AppBar(
+          actions: [
+            if (userData!['profile']['organization'].isNotEmpty && !_isOwner)
+            IconButton(
+              icon: Icon(Icons.swap_horiz_rounded),
+              onPressed: () {
+                setState(() async {
+                  Map<String, dynamic>? temp = await service.get('users', Auth().currentUser!.email.toString());
+                  temp!['profile']['useOrganization'] = !temp['profile']['useOrganization'];
+                  await service.update('users', Auth().currentUser!.email.toString(), {
+                    'profile': temp['profile']
+                  });
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(initialPage: false)));
+                });
+              },
+            ),
+          ],
+        ),
+        
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -287,13 +308,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
               Padding(
                 padding: EdgeInsets.only(bottom: 40, left: 16, right: 16),
-                child: Text("Get started with adding device connections", style: GoogleFonts.nunito(fontSize: 24)),
+                child: Text("Let's get started with adding widgets", style: GoogleFonts.nunito(fontSize: 24)),
               ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(150, 50),
+                ),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
                 },
-                child: Text('Add Device', style: GoogleFonts.nunito()),
+                child: Text('Add Widgets', style: GoogleFonts.nunito()),
               ),
             ],
           ),
