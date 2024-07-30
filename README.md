@@ -21,6 +21,9 @@ Install all required libraries
 flutter pub get
 ```
 
+Replace `firebase_options.dart` file in `lib/` folder with your own firebase credentials. </br>
+Watch this [Add firebase to flutter](https://www.youtube.com/watch?v=FkFvQ0SaT1I) video for quick setup.
+
 
 Power on emulator or connect to a physical device.
 ```
