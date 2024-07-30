@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
+import 'package:home_iot/components/add_button.dart';
 import 'package:home_iot/components/add_gate.dart';
 import 'package:home_iot/components/add_lamp.dart';
 import 'package:home_iot/components/add_videostream.dart';
@@ -16,24 +17,26 @@ class AddDevice extends StatefulWidget {
 }
 
 class _AddDeviceState extends State<AddDevice>{
-  static const List<String> typeList = <String>['Video Stream', 'Gate', 'Lamps'];
+  static const List<String> typeList = <String>['Video Stream', 'Gate', 'Lamps', 'Button'];
   String dropdownValue = typeList.first;
   CloudFirestoreService? service;
 
   final GateFields gateFields = GateFields();
   final LampFields lampFields = LampFields();
   final VideoStreamFields videoStreamFields = VideoStreamFields();
+  final ButtonFields buttonFields = ButtonFields();
 
   void handleAddAction(Map<String, dynamic> data) {
     try {
       final deviceData = widget.userData[data.keys.first] ?? [];
-      print(deviceData);
       deviceData.add(data[data.keys.first]);
       service?.update('users', Auth().currentUser!.email.toString(), {
         data.keys.first: deviceData,
       });
       CustomToast(context).showToast('Device added successfully!', Icons.check_rounded);
       Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pushNamed(context, '/devices');
     }
     catch (e) {
       print(e);
@@ -95,6 +98,8 @@ class _AddDeviceState extends State<AddDevice>{
                   lampFields,
                 if (dropdownValue == 'Video Stream')
                   videoStreamFields,
+                if (dropdownValue == 'Button')
+                  buttonFields,
 
                 // if (widget.userData['profile']['organization']['isOwner'])
                 Padding(
@@ -114,6 +119,9 @@ class _AddDeviceState extends State<AddDevice>{
                         }
                         else if (dropdownValue == 'Video Stream') {
                           handleAddAction(videoStreamFields.getText());
+                        }
+                        else if (dropdownValue  == 'Button') {
+                          handleAddAction(buttonFields.getText());
                         }
                       },
                       child: Text('Confirm Add Device', style: GoogleFonts.nunito()),

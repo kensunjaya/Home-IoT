@@ -108,6 +108,7 @@ class _AddOrganizationState extends State<AddOrganization> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: <Widget>[
+                Icon(Icons.groups_rounded, size: 125),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: TextField(
@@ -136,6 +137,9 @@ class _AddOrganizationState extends State<AddOrganization> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 50),
+                      ),
                       onPressed: () {
                         postData();
                       },

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
@@ -19,7 +20,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> register(BuildContext context) async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty || usernameController.text.isEmpty || labelController.text.isEmpty) {
-      CustomToast(context).showToast('Please fill in all fields!', Icons.error_rounded);
+      CustomToast(context).showToast('Please fill in all required fields!', Icons.error_rounded);
       return;
     }
     try {
@@ -41,9 +42,27 @@ class _RegisterPageState extends State<RegisterPage> {
       });
       CustomToast(context).showToast('Account created successfully!', Icons.check_rounded);
       Navigator.pushReplacementNamed(context, '/home');
-    }
-    catch (e) {
-      CustomToast(context).showToast(e.toString(), Icons.error_rounded);
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'email-already-in-use':
+          errorMessage = 'The email address is already in use.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Email/password accounts are not enabled.';
+          break;
+        case 'weak-password':
+          errorMessage = 'The password is too weak.';
+          break;
+        default:
+          errorMessage = 'An unknown error occurred.';
+      }
+      CustomToast(context).showToast(errorMessage, Icons.error_rounded);
+    } catch (e) {
+      CustomToast(context).showToast('An error occurred. Please try again.', Icons.error_rounded);
     }
   }
 
@@ -100,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   controller: labelController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Enter a collection name..",
+                    hintText: "Enter your project title..",
                   )
                 )
               ),
@@ -122,11 +141,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   text: TextSpan(
                     style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.black)),
                     children: <TextSpan>[
-                      TextSpan(text: 'Already have an account? '),
+                      TextSpan(text: 'Already have an account? ', style: TextStyle(fontSize: 16)),
                       TextSpan(
                         text: 'Sign In',
                         
-                        style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.blue)),
+                        style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.w500)),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.pushReplacementNamed(context, '/login');

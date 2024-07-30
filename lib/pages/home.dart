@@ -301,7 +301,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
 
       drawer: AppDrawer(),
-      body: Column(
+      body: ListView(
         children: [ 
           if (userData!.containsKey('video_stream'))
             Padding(
@@ -327,8 +327,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Future.delayed(Duration(milliseconds: 500), () {
                     _isSwiping = false;
                   });
-
-                  
                 },
                 child: 
                 IgnorePointer(
@@ -420,10 +418,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
 
           if (userData!.containsKey('lamps'))
-            Expanded(
-              child: SizedBox(
-                height: 250,
-                child: GridView.builder(
+            SizedBox(
+              height: 110 * (devices.length / 2),
+              child: GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: devices.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -469,13 +467,56 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                               }))
                             ],
                           )
-                        )
+                        
                       ),
                     ),
                   ),
                 ),
               )
-            ),
+          ),
+          if (userData!.containsKey('button'))
+              SizedBox(
+                height: (userData!['button'].length / 3) * 150,
+                child: GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: userData!['button'].length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 1.5,
+                  ),
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SizedBox(
+                      height: 50, // Fixed height
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10), 
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, double.infinity),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            shadowColor: Colors.grey, 
+                            // backgroundColor: Colors.white,
+                          ),
+                          onPressed: () async {
+                            Vibration.vibrate(duration: 100);
+                            CustomToast(context).showToast("Button ${userData!['button'][index]['label']} pressed", Icons.stop_rounded);
+                            await http.get(Uri.parse(userData!['button'][index]['action']));
+                          },
+                          onLongPress: () async {
+                            Vibration.vibrate(duration: 250);
+                            CustomToast(context).showToast("Button ${userData!['button'][index]['label']} long pressed", Icons.stop_rounded);
+                            await http.get(Uri.parse(userData!['button'][index]['onLongPress']));
+                          },
+                          child: Text(userData!['button'][index]['label'], style: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                        )
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            
         ],
       ),
     );
