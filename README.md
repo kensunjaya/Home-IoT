@@ -6,7 +6,7 @@ Home IoT is a mobile application designed for the smart home ecosystem. This app
 
 #### Pre-requisites
 1. <a href="https://docs.flutter.dev/get-started/install">Flutter SDK</a>
-2. Android / iOS emulator or physical device (API level 27+)
+2. Android / iOS emulator or physical device (Recommended API level 33+)
 3. Visual Studio Code + [Flutter](https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter) extension
 
 Clone this repository then enter the directory
