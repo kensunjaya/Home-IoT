@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/firestore.dart';
 import 'package:home_iot/pages/drawer.dart';
 import 'package:vibration/vibration.dart';
+import 'package:provider/provider.dart';
+import 'package:home_iot/theme_notifier.dart'; // Import ThemeNotifier
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -15,14 +18,14 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver {
   late CloudFirestoreService service;
-
   late Map<String, dynamic>? userData = {};
+  static const List<String> colorList = <String>['Cyan', 'Indigo', 'Blue', 'Red', 'Green', 'Yellow', 'Purple', 'Orange', 'Pink', 'Brown', 'Teal'];
+  String colorValue = GetStorage().read('seed_color') ?? 'Cyan';
 
   bool _isInitialized = false;
 
   Future<void> fetchDevice() async {
     userData = await service.get('users', Auth().currentUser!.email.toString());
-    print(userData);
   }
 
   @override
@@ -65,6 +68,8 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
       );
     }
 
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+
     return Scaffold(
       appBar: AppBar(title: Text('Settings', style: GoogleFonts.nunito()), centerTitle: true),
       drawer: AppDrawer(),
@@ -89,6 +94,36 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
                       userData!['profile']['biometric_auth'] = value;
                     });
                   },
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.color_lens_rounded, size: 36),
+                title: Text('App Accent Color', style: GoogleFonts.nunito()),
+                trailing: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.grey),
+                  ),
+                  child: DropdownButton<String>(
+                    borderRadius: BorderRadius.circular(5),
+                    style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.black, fontSize: 16)),
+                    value: colorValue,
+                    icon: Icon(Icons.arrow_drop_down_rounded),
+                    underline: SizedBox(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        colorValue = newValue!;
+                      });
+                      themeNotifier.setSeedColor(newValue!);
+                    },
+                    items: colorList.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ]

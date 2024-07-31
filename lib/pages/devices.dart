@@ -20,7 +20,6 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
 
   Future<void> fetchDevice() async {
     userData = await service.get('users', Auth().currentUser!.email.toString());
-    print(userData);
   }
 
   @override
@@ -52,7 +51,7 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
           if (item is Map) {
             return ExpansionTile(
               title: Text('${item['label']}', style: GoogleFonts.nunito()),
-              children: item.entries.map((entry) => buildKeyValueTile(entry.key, entry.value)).toList(),
+              children: item.entries.where((entry) => entry.key != 'label' && entry.key != 'status').map((entry) => buildKeyValueTile(entry.key, entry.value)).toList(),
             );
           } else {
             return ListTile(

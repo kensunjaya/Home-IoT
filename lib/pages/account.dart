@@ -33,7 +33,6 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
 
   Future<void> fetchDevice() async {
     userData = await service.get('users', Auth().currentUser!.email.toString());
-    print(userData);
   }
 
   @override

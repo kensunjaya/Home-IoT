@@ -358,6 +358,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 onPanUpdate: (details) {
                   if (_isSwiping) return;
                   _isSwiping = true;
+                  Vibration.vibrate(duration: 50);
 
                   if (details.delta.dx > 0 && videoStreamIndex > 0) {
                     setState(() {
