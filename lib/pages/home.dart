@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   );
   late Map<String, dynamic>? userData = {};
   late List devices = [];
-  String loadingMessage = 'Loading ..';
+  String loadingMessage = 'loading..';
   int videoStreamIndex = 0;
   int gateIndex = 0;
   bool _isAuthenticated = false;
@@ -240,7 +240,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      _vlcViewController.play(); // Restart the stream when app resumes
+      if (_vlcViewController.value.isInitialized) {
+        _vlcViewController.setMediaFromNetwork(userData!['video_stream'][videoStreamIndex]['url']);
+        _vlcViewController.play();
+      } else {
+        _initializeVlcPlayer(); // Reinitialize the player
+      }
     }
   }
 
