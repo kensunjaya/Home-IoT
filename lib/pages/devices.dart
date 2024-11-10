@@ -84,7 +84,7 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
             children: [
               Padding(
                 padding: EdgeInsets.only(bottom: 40),
-                child: Text('Loading ..', style: GoogleFonts.nunito(fontSize: 24)),
+                child: Text('Loading', style: GoogleFonts.nunito(fontSize: 24)),
               ),
               CircularProgressIndicator(),
             ],
@@ -97,7 +97,7 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
 
     return Scaffold(
       appBar: AppBar(title: Text('My Widgets', style: GoogleFonts.nunito()), centerTitle: true),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: userData!.keys.length > 1 ?
       ListView(
         children: [
