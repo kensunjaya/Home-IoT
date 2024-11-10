@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
@@ -29,10 +30,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     'https://example.com/placeholder', // Placeholder URL
     hwAcc: HwAcc.full,
     autoPlay: false,
+    options: VlcPlayerOptions(
+      advanced: VlcAdvancedOptions([
+        VlcAdvancedOptions.networkCaching(400),
+      ]),
+    )
   );
   late Map<String, dynamic>? userData = {};
   late List devices = [];
-  String loadingMessage = 'loading..';
+  String loadingMessage = 'Loading';
   int videoStreamIndex = 0;
   int gateIndex = 0;
   bool _isAuthenticated = false;
@@ -99,8 +105,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('You have been invited to join $organizationName by $sender.', style: GoogleFonts.nunito()),
-                Text('Accepting the invitation will allow you to access their exclusive widgets.', style: GoogleFonts.nunito()),
+                Text('$sender has invited you to be part of $organizationName.', style: GoogleFonts.nunito()),
+                Text('Tapping accept will allow you to access their exclusive widgets.', style: GoogleFonts.nunito()),
               ],
             ),
           ),
@@ -135,7 +141,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   await service.update('users', Auth().currentUser!.email.toString(), {
                     'profile': userData!['profile']
                   });
-                  CustomToast(context).showToast('You are now member of $organizationName', Icons.check_rounded);
+                  CustomToast(context).showToast('You are now part of $organizationName', Icons.check_rounded);
                 } catch (e) {
                   print(e);
                 } 
@@ -246,6 +252,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       } else {
         _initializeVlcPlayer(); // Reinitialize the player
       }
+    }
+    else if (state == AppLifecycleState.paused) {
+      _vlcViewController.pause();
+      SystemNavigator.pop();
     }
   }
 
