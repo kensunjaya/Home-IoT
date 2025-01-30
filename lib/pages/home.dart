@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   );
   late Map<String, dynamic>? userData = {};
   late List devices = [];
+
   String loadingMessage = 'Loading';
   int videoStreamIndex = 0;
   int gateIndex = 0;
@@ -237,16 +238,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    WakelockPlus.disable();
     _vlcViewController.dispose();
+    WakelockPlus.disable();
     super.dispose();
   }
   
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
+    // super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       if (_vlcViewController.value.isInitialized) {
+        _vlcViewController.stop();
         _vlcViewController.setMediaFromNetwork(userData!['video_stream'][videoStreamIndex]['url']);
         _vlcViewController.play();
       } else {
@@ -254,8 +256,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
     }
     else if (state == AppLifecycleState.paused) {
-      _vlcViewController.pause();
-      SystemNavigator.pop();
+      _vlcViewController.stop();
     }
   }
 
