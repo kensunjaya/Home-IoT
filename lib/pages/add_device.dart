@@ -5,7 +5,9 @@ import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/add_button.dart';
 import 'package:home_iot/components/add_gate.dart';
 import 'package:home_iot/components/add_lamp.dart';
+import 'package:home_iot/components/add_multiple_lamps.dart';
 import 'package:home_iot/components/add_videostream.dart';
+import 'package:home_iot/components/custom_button.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 
@@ -14,15 +16,21 @@ class AddDevice extends StatefulWidget {
   const AddDevice({super.key, required this.userData});
   @override
   State<AddDevice> createState() => _AddDeviceState();
+  
+  
 }
 
 class _AddDeviceState extends State<AddDevice>{
-  static const List<String> typeList = <String>['Video Stream', 'Gate', 'Lamps', 'Button'];
+  static const List<String> typeList = <String>['Video Stream', 'Gate', 'Lamp', 'Multiple Lamps', 'Button'];
+  final GlobalKey<MultipleLampFieldsState> multipleLampFieldsKey = GlobalKey<MultipleLampFieldsState>();
+
   String dropdownValue = typeList.first;
   CloudFirestoreService? service;
 
   final GateFields gateFields = GateFields();
   final LampFields lampFields = LampFields();
+  late MultipleLampFields multipleLampFields;
+
   final VideoStreamFields videoStreamFields = VideoStreamFields();
   final ButtonFields buttonFields = ButtonFields();
 
@@ -32,15 +40,14 @@ class _AddDeviceState extends State<AddDevice>{
       return;
     }
     try {
-      final deviceData = widget.userData[data!.keys.first] ?? [];
+      final deviceData = widget.userData[data.keys.first] ?? [];
       deviceData.add(data[data.keys.first]);
       service?.update('users', Auth().currentUser!.email.toString(), {
         data.keys.first: deviceData,
       });
       CustomToast(context).showToast('Widget added successfully!', Icons.check_rounded);
       Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pushNamed(context, '/devices');
+      Navigator.pushReplacementNamed(context, '/devices');
     }
     catch (e) {
       print(e);
@@ -52,6 +59,7 @@ class _AddDeviceState extends State<AddDevice>{
   void initState() {
     super.initState();
     service = CloudFirestoreService(FirebaseFirestore.instance);
+    multipleLampFields = MultipleLampFields(key: multipleLampFieldsKey);
   }
 
   @override
@@ -96,39 +104,34 @@ class _AddDeviceState extends State<AddDevice>{
 
                 if (dropdownValue == 'Gate')
                   gateFields,
-                if (dropdownValue == 'Lamps')
+                if (dropdownValue == 'Lamp')
                   lampFields,
+                if (dropdownValue == 'Multiple Lamps')
+                  multipleLampFields,
                 if (dropdownValue == 'Video Stream')
                   videoStreamFields,
                 if (dropdownValue == 'Button')
                   buttonFields,
-
-                // if (widget.userData['profile']['organization']['isOwner'])
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 50),
-                      ),
-                      onPressed: () {
-                        if (dropdownValue == 'Lamps') {
-                          handleAddAction(lampFields.getText());
-                        }
-                        else if (dropdownValue == 'Gate') {
-                          handleAddAction(gateFields.getText());
-                        }
-                        else if (dropdownValue == 'Video Stream') {
-                          handleAddAction(videoStreamFields.getText());
-                        }
-                        else if (dropdownValue  == 'Button') {
-                          handleAddAction(buttonFields.getText());
-                        }
-                      },
-                      child: Text('Confirm add widget', style: GoogleFonts.nunito()),
-                    ),
-                  )
+                CustomButton(
+                  onPressed: () {
+                    if (dropdownValue == 'Lamps') {
+                      handleAddAction(lampFields.getText());
+                    }
+                    else if (dropdownValue == 'Gate') {
+                      handleAddAction(gateFields.getText());
+                    }
+                    else if (dropdownValue == 'Video Stream') {
+                      handleAddAction(videoStreamFields.getText());
+                    }
+                    else if (dropdownValue  == 'Button') {
+                      handleAddAction(buttonFields.getText());
+                    }
+                    else if (dropdownValue == 'Multiple Lamps') {
+                      final data = multipleLampFieldsKey.currentState?.getText();
+                      handleAddAction(data);
+                    }
+                  },
+                  label: "Confirm Add Widget",
                 ),
               ],
             ),

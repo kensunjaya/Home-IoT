@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/custom_toast.dart';
@@ -8,8 +10,8 @@ import 'package:home_iot/firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:home_iot/pages/add_device.dart';
 import 'package:home_iot/pages/drawer.dart';
+import 'package:home_iot/utils/network_utils.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as html_parser; // Import the html package
 import 'package:local_auth/local_auth.dart';
 import 'package:vibration/vibration.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -32,41 +34,38 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     autoPlay: false,
     options: VlcPlayerOptions(
       advanced: VlcAdvancedOptions([
-        VlcAdvancedOptions.networkCaching(400),
+        VlcAdvancedOptions.networkCaching(1500),
       ]),
     )
   );
   late Map<String, dynamic>? userData = {};
   late List devices = [];
+  late List lamps = [];
 
   String loadingMessage = 'Loading';
   int videoStreamIndex = 0;
   int gateIndex = 0;
   bool _isAuthenticated = false;
+  final bool _autoAspectRatio = GetStorage().read('auto_aspect_ratio') == "false" ? false : true;
   bool _isInitialized = false;
-  bool _isSwiping = false;
+  // bool _isSwiping = false;
   bool _isOwner = true;
-
-  Future<bool> fetchStatus(String url) async {
-    var parsedUrl = Uri.parse(url);
-    final httpPackageResponse = await http.get(parsedUrl);
-    // Parse the HTML response
-    var document = html_parser.parse(httpPackageResponse.body);
-    // Extract the text content
-    var textContent = document.body?.text ?? 'Error parsing response';
-    if (textContent.trim() == '1') {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
 
   void initStatus() {
     for (var device in devices) {
       fetchStatus(device['status_url']).then((value) {
         setState(() {
           device['status'] = value;
+        });
+      });
+    }
+  }
+
+  void initMultipleLampsStatus() {
+    for (var lamp in lamps) {
+      fetchStatusWithDelimiter(lamp['status_url'], lamp['delimiter']).then((value) {
+        setState(() {
+          lamp['status'] = value;
         });
       });
     }
@@ -82,8 +81,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _isOwner = false;
     }
     devices = userData?['lamps'] ?? [];
+    lamps = userData?['multiple_lamps'] ?? [];
+    if (lamps.isNotEmpty) {
+      initMultipleLampsStatus();
+    }
     if (devices.isNotEmpty) {
-      print("initializing status");
       initStatus();
     }
   }
@@ -213,6 +215,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
+  Timer? _pollingTimer;
+
 
   void _initializeVlcPlayer() {
     if (userData?['video_stream']?[videoStreamIndex]?['url'] != null) {
@@ -221,11 +225,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _vlcViewController.setMediaFromNetwork(newUrl);
         _vlcViewController.play();
       } else {
+        bool isHlsStream = newUrl.endsWith('.m3u8');
         _vlcViewController = VlcPlayerController.network(
           newUrl,
           hwAcc: HwAcc.full,
           autoPlay: true,
+          options: VlcPlayerOptions(
+            advanced: VlcAdvancedOptions([
+              VlcAdvancedOptions.networkCaching(isHlsStream ? 5000 : 1000),
+            ]),
+            rtp: VlcRtpOptions([
+              VlcRtpOptions.rtpOverRtsp(isHlsStream ? true : false),
+            ]),
+          ),
         );
+        if (isHlsStream) {
+          _pollingTimer = Timer.periodic(Duration(milliseconds: 1800), (timer) {
+            _vlcViewController.stop();
+            _vlcViewController.play();
+          });
+        }
+
+        
         _vlcViewController.initialize().then((_) {
           if (_vlcViewController.value.isInitialized) {
             _vlcViewController.play();
@@ -237,6 +258,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _vlcViewController.dispose();
     WakelockPlus.disable();
@@ -342,7 +364,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text(userData?['video_stream']?[videoStreamIndex]?['label'] ?? userData?['profile']['label'], style: GoogleFonts.nunito()), 
+        title: Text(userData?['video_stream']?[videoStreamIndex]?['label'] ?? userData?['profile']['header'], style: GoogleFonts.nunito()), 
         centerTitle: true,
         actions: [
           if (userData!['profile']['organization'].isNotEmpty && !_isOwner)
@@ -371,34 +393,61 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               padding: EdgeInsets.all(10),
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onPanUpdate: (details) {
-                  if (_isSwiping) return;
-                  _isSwiping = true;
-                  Vibration.vibrate(duration: 50);
-
-                  if (details.delta.dx > 0 && videoStreamIndex > 0) {
+                onTapDown: (TapDownDetails details) {
+                showMenu(
+                  context: context,
+                  position: RelativeRect.fromLTRB(
+                    details.globalPosition.dx,
+                    details.globalPosition.dy,
+                    details.globalPosition.dx,
+                    details.globalPosition.dy,
+                  ),
+                  items: userData?['video_stream'].map<PopupMenuEntry<int>>((vid) {
+                    return PopupMenuItem<int>(
+                      value: userData?['video_stream'].indexOf(vid),
+                      child: Text(vid['label'], style: GoogleFonts.nunito(fontSize: 18)),
+                    );
+                  }).toList(),
+                ).then((index) {
+                  if (index != null) {
                     setState(() {
-                      videoStreamIndex--;
-                    });
-                    _initializeVlcPlayer();
-
-                  } else if (details.delta.dx < 0 && videoStreamIndex < userData?['video_stream']?.length - 1) {
-                    setState(() {
-                      videoStreamIndex++;
+                      videoStreamIndex = index;
                     });
                     _initializeVlcPlayer();
                   }
-                  Future.delayed(Duration(milliseconds: 500), () {
-                    _isSwiping = false;
-                  });
-                },
+                });
+              },
+                // onPanUpdate: (details) {
+                //   if (_isSwiping) return;
+                //   _isSwiping = true;
+                //   Vibration.vibrate(duration: 50);
+
+                //   if (details.delta.dx > 0 && videoStreamIndex > 0) {
+                //     setState(() {
+                //       videoStreamIndex--;
+                //     });
+                //     _initializeVlcPlayer();
+
+                //   } else if (details.delta.dx < 0 && videoStreamIndex < userData?['video_stream']?.length - 1) {
+                //     setState(() {
+                //       videoStreamIndex++;
+                //     });
+                //     _initializeVlcPlayer();
+                //   }
+                //   Future.delayed(Duration(milliseconds: 500), () {
+                //     _isSwiping = false;
+                //   });
+                // },
                 child: 
                 IgnorePointer(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: VlcPlayer(
                       controller: _vlcViewController,
-                      aspectRatio: 4 / 3,
+                      aspectRatio: _autoAspectRatio && userData?['video_stream']?[videoStreamIndex]?['aspect_ratio'] != null
+                        ? userData!['video_stream'][videoStreamIndex]['aspect_ratio']['horizontal'] / 
+                          userData!['video_stream'][videoStreamIndex]['aspect_ratio']['vertical']
+                        : (4 / 3),
                       placeholder: Center(child: CircularProgressIndicator()),
                     ),
                   )
@@ -419,8 +468,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         child: SizedBox.expand(
                           child: ElevatedButton(
                             onPressed: () async {
-                              Vibration.vibrate(duration: 200);
-                              CustomToast(context).showToast("Opening Gate", Icons.stop_rounded);
+                              Vibration.vibrate(duration: 100);
+                              // play sound
+                              CustomToast(context).showToast("Opening Gate", Icons.lock_open_rounded);
                               await http.get(Uri.parse(userData?['gate'][gateIndex]['open_url']));
                             },
                             style: ElevatedButton.styleFrom(
@@ -440,7 +490,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         child: SizedBox.expand(
                           child: ElevatedButton(
                             onPressed: () async {
-                              Vibration.vibrate(duration: 200);
+                              Vibration.vibrate(duration: 100);
                               CustomToast(context).showToast("Toggled Gate", Icons.stop_rounded);
                               await http.get(Uri.parse(userData?['gate'][gateIndex]['toggle_url']));
                             },
@@ -461,8 +511,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         child: SizedBox.expand(
                           child: ElevatedButton(
                             onPressed: () async {
-                              Vibration.vibrate(duration: 200);
-                              CustomToast(context).showToast("Closing Gate", Icons.stop_rounded);
+                              Vibration.vibrate(duration: 100);
+                              CustomToast(context).showToast("Closing Gate", Icons.lock_rounded);
                               await http.get(Uri.parse(userData?['gate'][gateIndex]['close_url']));
                             },
                             style: ElevatedButton.styleFrom(
@@ -480,6 +530,72 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 ),
               )
             ),
+
+          if (userData!.containsKey('multiple_lamps'))
+          ...(userData?['multiple_lamps'] ?? []).map((lamps) => 
+            SizedBox(
+              height: (110 * (lamps['label'].length / 2).ceil()).toDouble(),
+              child: GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: lamps['label'].length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 2,
+                  ),
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SizedBox(
+                      height: 50, // Fixed height
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withValues(alpha: 0.5),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: Offset(4, 4),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10), 
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Icon(
+                                lamps['status'][index] ? Icons.lightbulb_rounded : Icons.lightbulb_outline_rounded,
+                                size: 24,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              Text(lamps['label'][index], style: GoogleFonts.nunito(fontSize: 14)),
+                              Transform.scale(scale: 0.75, child: Switch(value: lamps['status'][index] ?? false,
+                              onChanged: (bool value) {
+                                Vibration.vibrate(duration: 30);
+                                CustomToast(context).showToast("Turned ${value ? 'on' : 'off'} Lampu ${lamps['label'][index]}", Icons.lightbulb_outline_rounded);
+                                setState(() async {
+                                  lamps['status'][index] = value;
+                                  if (value) {
+                                    await http.get(Uri.parse(lamps['on_url'][index]));
+                                  }
+                                  else {
+                                    await http.get(Uri.parse(lamps['off_url'][index]));
+                                  }
+                                  initMultipleLampsStatus();
+                                });
+                              }))
+                            ],
+                          )
+                        
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            )
+          ).toList(),
+            
 
           if (userData!.containsKey('lamps'))
             SizedBox(
@@ -501,7 +617,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           color: Colors.white,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.grey.withValues(alpha: 0.5),
                               spreadRadius: 1,
                               blurRadius: 10,
                               offset: Offset(4, 4),

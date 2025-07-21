@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
+import 'package:home_iot/components/custom_button.dart';
 import 'package:home_iot/firestore.dart';
 import 'package:home_iot/pages/add_device.dart';
 import 'package:home_iot/pages/drawer.dart';
@@ -100,25 +101,48 @@ class _MyDevicesState extends State<MyDevices> with WidgetsBindingObserver {
       drawer: AppDrawer(),
       body: userData!.keys.length > 1 ?
       ListView(
+        padding: const EdgeInsets.all(16.0),
         children: [
-          Column(
-            children: userData!.entries
-              .where((entry) => entry.key != 'profile' && entry.key != 'header')
-              .map((entry) => buildKeyValueTile(entry.key, entry.value))
-              .toList(),
-            ),
-          Padding(padding: EdgeInsets.all(16.0), 
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
-              ),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
-              },
-              child: Text('Add another widget', style: GoogleFonts.nunito()),
+          ...userData!.entries
+            .where((entry) => entry.key != 'profile' && entry.key != 'header')
+            .expand((entry) {
+              final key = entry.key;
+              final value = entry.value;
+
+              if (value is List) {
+                return value.map<Widget>((item) {
+                  if (item is Map<String, dynamic>) {
+                    if (item.containsKey('delimiter')) {
+                      item.remove('label');
+                      item.remove('off_url');
+                      item.remove('on_url');
+                      item.remove('status');
+                      item.remove('delimiter');
+                      return buildKeyValueTile(key, item);
+                    }
+                    return buildKeyValueTile(key, item);
+                  } else {
+                    return buildKeyValueTile(key, {'value': item});
+                  }
+                }).toList();
+              } else if (value is Map) {
+                return [buildKeyValueTile(key, value)];
+              } else {
+                return [buildKeyValueTile(key, {'value': value})];
+              }
+            }),
+          CustomButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddDevice(userData: userData!),
+                ),
+              );
+            },
+            label: 'Add another widget'
             )
-          )
-        ]
+        ],
       )
       :
       Center(

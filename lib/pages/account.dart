@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/add_organization.dart';
+import 'package:home_iot/components/custom_button.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 import 'package:home_iot/pages/drawer.dart';
@@ -106,16 +107,11 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                 }
                   
               ),
-              Padding(padding:EdgeInsets.only(top: 16),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(double.infinity, 50),
-                  ),
-                  onPressed: () {
-                    signout(context);
-                  },
-                  child: Text('Sign Out', style: GoogleFonts.nunito()),
-                )
+              CustomButton(
+                onPressed: () {
+                  signout(context);
+                },
+                label: 'Sign Out',
               ),
             ]
           ),

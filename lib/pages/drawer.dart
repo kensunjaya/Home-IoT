@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:home_iot/auth.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
-import 'package:home_iot/pages/add_device.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:vibration/vibration.dart';
 
@@ -14,25 +12,21 @@ class AppDrawer extends StatelessWidget {
   late CloudFirestoreService service;
   late Map<String, dynamic>? userData = {};
 
-  Future<void> fetchDevice() async {
-    userData = await service.get('users', Auth().currentUser!.email.toString());
-  }
+  // Future<void> fetchDevice() async {
+  //   userData = await service.get('users', Auth().currentUser!.email.toString());
+  // }
 
 
   @override
   Widget build(BuildContext context) {
     void routeToAddDevice() async {
-      await fetchDevice();
-      if (userData!.isNotEmpty) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => AddDevice(userData: userData!)));
-        Vibration.vibrate(duration: 500);
-        CustomToast(context).showToast("Cannot find any biometric devices", Icons.error_rounded);
-      }
+      // await fetchDevice();
+      Navigator.pushReplacementNamed(context, '/devices');
     }
     
     return Drawer(
-        width: 225,
-        backgroundColor: Colors.white,
+        width: 205,
+        backgroundColor: Theme.of(context).canvasColor,
         child: Column(
           children: [
             DrawerHeader(
@@ -44,21 +38,21 @@ class AppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(Icons.home_rounded),
-              title: Text('Home', style: GoogleFonts.nunito()),
+              title: Text('Home', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
               onTap: () {
                 Navigator.pushReplacementNamed(context, '/home');
               },
             ),
             ListTile(
               leading: Icon(Icons.settings),
-              title: Text('Settings', style: GoogleFonts.nunito()),
+              title: Text('Settings', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
               onTap: () {
                 Navigator.pushReplacementNamed(context, '/settings');
               },
             ),
             ListTile(
               leading: Icon(Icons.dashboard_customize_rounded),
-              title: Text('My Widgets', style: GoogleFonts.nunito()),
+              title: Text('My Widgets', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
               onTap: () async {
                 final LocalAuthentication auth = LocalAuthentication();
                 bool canAuthenticate = false;
@@ -85,7 +79,6 @@ class AppDrawer extends StatelessWidget {
                     print(e);
                     routeToAddDevice();
                     Vibration.vibrate(duration: 500);
-                    CustomToast(context).showToast("Cannot find any biometric devices", Icons.error_rounded);
                   } 
                 }
                 else {
@@ -95,7 +88,7 @@ class AppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(Icons.manage_accounts_rounded),
-              title: Text('My Account', style: GoogleFonts.nunito()),
+              title: Text('My Account', style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
               onTap: () {
                 Navigator.pushReplacementNamed(context, '/account');
               },

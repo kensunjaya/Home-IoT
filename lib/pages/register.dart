@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_iot/auth.dart';
+import 'package:home_iot/components/custom_button.dart';
 import 'package:home_iot/components/custom_toast.dart';
 import 'package:home_iot/firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -81,94 +83,97 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Create an account', style: GoogleFonts.nunito(fontSize: 24), textAlign: TextAlign.left),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: TextField(
-                  style: GoogleFonts.nunito(),
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Enter your name..",
-                  )
-                )
-              ),
-
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: TextField(
-                  style: GoogleFonts.nunito(),
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Enter your email..",
-                  )
-                )
-              ),
-
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: TextField(
-                  style: GoogleFonts.nunito(),
-                  controller: labelController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Enter your project title..",
-                  )
-                )
-              ),
-              
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: TextField(
-                  obscureText: true,
-                  style: GoogleFonts.nunito(),
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Enter your password..",
-                  )
-                )
-              ),
-              Padding(padding: EdgeInsets.only(bottom: 16), 
-                child: RichText(
-                  text: TextSpan(
-                    style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.black)),
-                    children: <TextSpan>[
-                      TextSpan(text: 'Already have an account? ', style: TextStyle(fontSize: 16)),
-                      TextSpan(
-                        text: 'Sign In',
-                        
-                        style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.w500)),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.pushReplacementNamed(context, '/login');
-                          }
-                      ),
-                    ],
-                  ),
-                )
-              ),
-              
-            
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(height: 100),
+                Text('Create an account', style: GoogleFonts.nunito(fontSize: 24, fontWeight: FontWeight.w600)),
+                SizedBox(height: 20),
+                SvgPicture.asset(
+                  'assets/logo.svg',
+                  height: 64,
+                  width: 64,
                 ),
-                onPressed: () {
-                  register(context);
-                },
-                child: Text('Sign Up', style: GoogleFonts.nunito()),
-              )
-            ]
-          ),
-        )
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: TextField(
+                    style: GoogleFonts.nunito(),
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "Enter your name..",
+                    )
+                  )
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: TextField(
+                    style: GoogleFonts.nunito(),
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "Enter your email..",
+                    )
+                  )
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: TextField(
+                    style: GoogleFonts.nunito(),
+                    controller: labelController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "Enter your project title..",
+                    )
+                  )
+                ),
+                
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: TextField(
+                    obscureText: true,
+                    style: GoogleFonts.nunito(),
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "Enter your password..",
+                    )
+                  )
+                ),
+                Padding(padding: EdgeInsets.only(bottom: 16), 
+                  child: RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.black)),
+                      children: <TextSpan>[
+                        TextSpan(text: 'Already have an account? ', style: TextStyle(fontSize: 16)),
+                        TextSpan(
+                          text: 'Sign In',
+                          
+                          style: GoogleFonts.nunito(textStyle: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.w600)),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushReplacementNamed(context, '/login');
+                            }
+                        ),
+                      ],
+                    ),
+                  )
+                ),
+                CustomButton(
+                  onPressed: () => register(context),
+                  label: "Sign Up"
+                )
+              ]
+            ),
+          )
+        ) 
       )
     );
   }

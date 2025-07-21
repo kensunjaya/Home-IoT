@@ -21,6 +21,7 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
   late Map<String, dynamic>? userData = {};
   static const List<String> colorList = <String>['Cyan', 'Indigo', 'Blue', 'Red', 'Green', 'Yellow', 'Purple', 'Orange', 'Pink', 'Brown', 'Teal'];
   String colorValue = GetStorage().read('seed_color') ?? 'Cyan';
+  String autoAspectRatio = GetStorage().read('auto_aspect_ratio') ?? true.toString();
 
   bool _isInitialized = false;
 
@@ -93,6 +94,19 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
                     setState(() {
                       userData!['profile']['biometric_auth'] = value;
                     });
+                  },
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.fullscreen_rounded, size: 36),
+                title: Text('Auto Aspect Ratio', style: GoogleFonts.nunito()),
+                trailing: Switch(
+                  value: autoAspectRatio == 'true',
+                  onChanged: (value) async {
+                    Vibration.vibrate(duration: 50);
+                    autoAspectRatio = value.toString();
+                    await GetStorage().write('auto_aspect_ratio', autoAspectRatio);
+                    setState(() {});
                   },
                 ),
               ),
